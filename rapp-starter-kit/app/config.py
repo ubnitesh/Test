@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     a1_pms_base_url: str = "http://localhost:8082"
     a1_policy_type_id: str = "20008"
     a1_service_id: str = "rapp-starter-kit"
+    a1_prb_steering_threshold_pct: float = 80.0
+    a1_termination_base_url: str = "http://localhost:8081"
+    a1_termination_path: str = "/a1-policy/v2/policies"
+    a1_status_notification_base: str = "http://localhost:8080"
+    a1_publish_enabled: bool = False
 
     # rApp identity
     rapp_name: str = "rapp-starter-kit"

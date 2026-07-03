@@ -4,79 +4,26 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
 from typing import Any
-from uuid import uuid4
 
-from fastapi import Depends, FastAPI, HTTPException
-from pydantic import BaseModel, Field, model_validator
+from fastapi import Depends, FastAPI, HTTPException, status
+from pydantic import BaseModel, Field
 
 from app.config import Settings, get_settings
-from app.services.policy_engine import PolicyEngine
+from app.services.policy_engine import PolicyEngine, evaluate_metrics
 from app.services.r1_consumer import R1Consumer
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rApp-Starter")
 
 
-# --- PM metric models (R1 data notification from SMO) ---
-
-
-class RsrpMetric(BaseModel):
-    """Reference Signal Received Power."""
-
-    value: float = Field(..., description="RSRP in dBm")
-    unit: str = "dBm"
-
-
-class SinrMetric(BaseModel):
-    """Signal-to-Interference-plus-Noise Ratio."""
-
-    value: float = Field(..., description="SINR in dB")
-    unit: str = "dB"
-
-
-class PrbUtilizationMetric(BaseModel):
-    """Physical Resource Block utilization."""
-
-    value: float = Field(..., description="PRB utilization percentage")
-    unit: str = "%"
-
-
-class CellPmMetrics(BaseModel):
-    """PM metrics for a single cell."""
-
-    cell_id: str = Field(..., min_length=1)
-    moi: str | None = Field(None, description="Managed Object Instance path")
-    rsrp: RsrpMetric | None = None
-    sinr: SinrMetric | None = None
-    prb_utilization: PrbUtilizationMetric | None = None
-
-    @model_validator(mode="after")
-    def at_least_one_metric(self) -> CellPmMetrics:
-        if not any((self.rsrp, self.sinr, self.prb_utilization)):
-            raise ValueError(
-                "At least one of rsrp, sinr, or prb_utilization must be provided"
-            )
-        return self
-
-
-class PmDataNotification(BaseModel):
-    """Incoming PM data notification from the SMO."""
-
-    metrics: list[CellPmMetrics] = Field(..., min_length=1)
-    notification_id: str | None = None
-    timestamp: datetime | None = None
-    source: str = "SMO"
-
-
-class PmNotificationResponse(BaseModel):
-    status: str
-    notification_id: str
-    cells_processed: int
-
-
-# --- Other request models ---
+class CellMetrics(BaseModel):
+    cell_id: str = Field(..., description="Target Cell Identifier")
+    rsrp: float = Field(..., description="Reference Signal Received Power")
+    sinr: float = Field(..., description="Signal-to-Interference-plus-Noise Ratio")
+    prb_utilization: float = Field(
+        ..., description="Physical Radio Block utilization percentage"
+    )
 
 
 class SnapshotRequest(BaseModel):
@@ -91,42 +38,6 @@ class PolicyRequest(BaseModel):
     policy_id: str | None = None
 
 
-class HealthResponse(BaseModel):
-    status: str
-    rapp: str
-
-
-def _pm_bounds(cfg: Settings) -> dict[str, tuple[float, float]]:
-    return {
-        "rsrp": (cfg.pm_rsrp_min_dbm, cfg.pm_rsrp_max_dbm),
-        "sinr": (cfg.pm_sinr_min_db, cfg.pm_sinr_max_db),
-        "prb_utilization": (0.0, cfg.pm_prb_utilization_max_pct),
-    }
-
-
-def _validate_pm_metric_ranges(
-    notification: PmDataNotification, cfg: Settings
-) -> None:
-    bounds = _pm_bounds(cfg)
-    for cell in notification.metrics:
-        for name, metric in (
-            ("rsrp", cell.rsrp),
-            ("sinr", cell.sinr),
-            ("prb_utilization", cell.prb_utilization),
-        ):
-            if metric is None:
-                continue
-            lo, hi = bounds[name]
-            if not lo <= metric.value <= hi:
-                raise HTTPException(
-                    status_code=422,
-                    detail=(
-                        f"Cell {cell.cell_id}: {name} value {metric.value} "
-                        f"outside allowed range [{lo}, {hi}]"
-                    ),
-                )
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
@@ -139,37 +50,31 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
 
     app = FastAPI(
-        title=settings.app_name,
-        version=settings.rapp_version,
+        title="O-RAN Non-RT RIC rApp Starter Kit",
+        version="1.0.0",
         description="O-RAN rApp starter — R1 consumer and A1 policy publisher",
         lifespan=lifespan,
     )
 
-    @app.get("/health", response_model=HealthResponse)
-    async def health() -> HealthResponse:
-        return HealthResponse(status="ok", rapp=settings.rapp_name)
+    @app.get("/health", status_code=status.HTTP_200_OK)
+    async def health_check() -> dict[str, str]:
+        return {"status": "healthy"}
 
-    # --- R1 routes (data ingestion) ---
-
-    @app.post("/r1/data-notification", response_model=PmNotificationResponse)
-    async def r1_pm_data_notification(
-        body: PmDataNotification,
-        cfg: Settings = Depends(get_settings),
-    ) -> PmNotificationResponse:
-        """Receive PM metrics (RSRP, SINR, PRB utilization) pushed from the SMO."""
-        _validate_pm_metric_ranges(body, cfg)
-
-        payload = body.model_dump(mode="json")
-        if payload.get("notification_id") is None:
-            payload["notification_id"] = str(uuid4())
-        if payload.get("timestamp") is None:
-            payload["timestamp"] = datetime.now(timezone.utc).isoformat()
-        payload["source"] = body.source or cfg.pm_notification_source
-
-        async with R1Consumer(cfg) as consumer:
-            result = await consumer.process_pm_notification(payload)
-
-        return PmNotificationResponse(**result)
+    @app.post("/r1/data-notification", status_code=status.HTTP_202_ACCEPTED)
+    async def receive_ran_data(metrics: CellMetrics) -> dict[str, Any]:
+        logger.info("Received RAN data for Cell: %s", metrics.cell_id)
+        try:
+            policy_triggered = await evaluate_metrics(metrics)
+            return {
+                "status": "processed",
+                "cell_id": metrics.cell_id,
+                "a1_policy_generated": policy_triggered,
+            }
+        except Exception as e:
+            logger.error("Failed to process metrics: %s", e)
+            raise HTTPException(
+                status_code=500, detail="Internal processing error"
+            ) from e
 
     @app.get("/r1/cm/{moi_path:path}")
     async def r1_read_configuration(
@@ -189,8 +94,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         async with R1Consumer(cfg) as consumer:
             return await consumer.fetch_snapshot(body.moi_paths)
-
-    # --- A1 routes (declarative policy output) ---
 
     @app.post("/a1/policies")
     async def a1_publish_policy(
