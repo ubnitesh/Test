@@ -22,6 +22,14 @@ class Settings(BaseSettings):
     r1_cm_path_prefix: str = "/ran-oam-cm/v1"
     r1_poll_interval_seconds: int = 30
 
+    # R1 PM data notification (pushed from SMO)
+    pm_notification_source: str = "SMO"
+    pm_rsrp_min_dbm: float = -140.0
+    pm_rsrp_max_dbm: float = -44.0
+    pm_sinr_min_db: float = -20.0
+    pm_sinr_max_db: float = 40.0
+    pm_prb_utilization_max_pct: float = 100.0
+
     # A1 Policy Management Service
     a1_pms_base_url: str = "http://localhost:8082"
     a1_policy_type_id: str = "20008"

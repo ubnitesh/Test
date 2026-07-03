@@ -55,3 +55,39 @@ class R1Consumer:
                 logger.warning("Failed to read MOI %s: %s", path, exc)
                 snapshot[path] = {"error": str(exc)}
         return snapshot
+
+    async def process_pm_notification(
+        self, notification: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Accept and process PM metrics pushed from the SMO via R1."""
+        from uuid import uuid4
+
+        notification_id = notification.get("notification_id") or str(uuid4())
+        metrics: list[dict[str, Any]] = notification.get("metrics", [])
+        source = notification.get("source", self._settings.pm_notification_source)
+
+        logger.info(
+            "PM data notification %s: %d cell(s) from %s",
+            notification_id,
+            len(metrics),
+            source,
+        )
+
+        for cell in metrics:
+            cell_id = cell.get("cell_id", "unknown")
+            rsrp = cell.get("rsrp")
+            sinr = cell.get("sinr")
+            prb = cell.get("prb_utilization")
+            logger.debug(
+                "Cell %s — RSRP=%s SINR=%s PRB util=%s",
+                cell_id,
+                rsrp.get("value") if isinstance(rsrp, dict) else rsrp,
+                sinr.get("value") if isinstance(sinr, dict) else sinr,
+                prb.get("value") if isinstance(prb, dict) else prb,
+            )
+
+        return {
+            "status": "accepted",
+            "notification_id": notification_id,
+            "cells_processed": len(metrics),
+        }
