@@ -1,0 +1,26 @@
+# rApp Starter Kit — Cursor AI directives
+
+You are assisting with an O-RAN Non-RT RIC rApp built on FastAPI.
+
+## Architecture
+- **R1 interface**: Consume data from the Non-RT RIC (configuration, KPIs, events) via `app/services/r1_consumer.py`.
+- **A1 interface**: Emit declarative policies to the Near-RT RIC via `app/services/policy_engine.py`.
+- **Routing**: All HTTP endpoints live in `app/main.py`; configuration in `app/config.py`.
+
+## Conventions
+- Use Python 3.11+ type hints and Pydantic models for request/response schemas.
+- Keep business logic in `services/`; `main.py` should only wire routes and dependencies.
+- Read settings from environment variables through `app.config.settings` — never hard-code URLs or credentials.
+- Follow O-RAN naming: R1 paths use prefixes like `ran-oam-cm/v1`; A1 policies follow the A1 JSON schema.
+- Prefer async I/O (`httpx.AsyncClient`) for external calls to Non-RT RIC and A1 Policy Management Service.
+
+## When adding features
+1. Extend `config.py` for new env vars with sensible defaults for local dev.
+2. Add service methods before adding routes.
+3. Update `requirements.txt` only when a new dependency is required.
+4. Keep the Dockerfile lean — multi-stage build, non-root user, expose port 8080.
+
+## Do not
+- Commit secrets or `.env` files.
+- Block the event loop with synchronous HTTP calls in async handlers.
+- Mix Java/Spring Boot patterns into this Python project.
