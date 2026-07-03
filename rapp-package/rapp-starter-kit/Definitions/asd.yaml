@@ -1,0 +1,30 @@
+tosca_definitions_version: tosca_simple_yaml_1_2
+
+description: rApp Starter Kit - Spring Boot lifecycle manager with R1 interface endpoints
+
+imports:
+  - asd_types.yaml
+
+topology_template:
+  node_templates:
+    applicationServiceDescriptor:
+      type: tosca.nodes.asd
+      description: "rapp-starter-kit"
+      properties:
+        descriptor_id: 7f3c8b12-9a4e-4d2f-b1c6-8e5d2a9f0c31
+        descriptor_invariant_id: 2b6d1e44-5c8a-4f9b-9d12-3a7e6b0c4d82
+        descriptor_version: "1.0"
+        schema_version: "2.0"
+        function_description: Spring Boot rApp Manager with ACM/DME/SME and O-RAN R1 APIs
+        provider: Nokia Powehi Autonomous Network
+        application_name: rapp-starter-kit
+        application_version: "0.1.0"
+      artifacts:
+        springBootHelmChart:
+          type: tosca.artifacts.asd.deploymentItem
+          file: Artifacts/Deployment/HELM/rapp-starter-kit-chart-0.1.0.tgz
+          properties:
+            artifact_type: helm_chart
+            target_server: chartmuseum
+            target_server_uri: UPDATE_THIS_CHART_MUSEUM_POST_CHARTS_URI
+            item_id: "1"

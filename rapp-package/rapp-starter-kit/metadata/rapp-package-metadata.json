@@ -1,0 +1,87 @@
+{
+  "description": "ASD package metadata for rApp Starter Kit Spring Boot deployment",
+  "descriptor_id": "7f3c8b12-9a4e-4d2f-b1c6-8e5d2a9f0c31",
+  "descriptor_invariant_id": "2b6d1e44-5c8a-4f9b-9d12-3a7e6b0c4d82",
+  "descriptor_version": "1.0",
+  "schema_version": "2.0",
+  "function_description": "Spring Boot rApp Manager with ACM/DME/SME and O-RAN R1 APIs",
+  "provider": "Nokia Powehi Autonomous Network",
+  "application_name": "rapp-starter-kit",
+  "application_version": "0.1.0",
+  "manifest": {
+    "application_name": "rapp-starter-kit",
+    "application_provider": "Nokia Powehi Autonomous Network",
+    "release_date_time": "2026-07-03T09:35:00+00:00",
+    "entry_definition_type": "asd"
+  },
+  "deployment_items": [
+    {
+      "file": "Artifacts/Deployment/HELM/rapp-starter-kit-chart-0.1.0.tgz",
+      "artifact_type": "helm_chart",
+      "item_id": "1",
+      "target_server": "chartmuseum",
+      "target_server_uri": "UPDATE_THIS_CHART_MUSEUM_POST_CHARTS_URI"
+    }
+  ],
+  "spring_boot_deployment": {
+    "runtime": {
+      "framework": "spring-boot",
+      "java_version": "17",
+      "packaging": "jar",
+      "main_class": "org.oransc.rappmanager.RappManagerApplication",
+      "server_port": 8080
+    },
+    "container": {
+      "image_repository": "rapp-starter-kit",
+      "image_tag": "0.1.0-SNAPSHOT",
+      "base_image": "eclipse-temurin:17-jre-alpine"
+    },
+    "kubernetes": {
+      "namespace": "nonrtric",
+      "release_name": "rapp-starter-kit",
+      "service_name": "rapp-starter-kit-service",
+      "helm_chart": {
+        "name": "rapp-starter-kit-chart",
+        "version": "0.1.0",
+        "artifact_path": "Artifacts/Deployment/HELM/rapp-starter-kit-chart-0.1.0.tgz"
+      }
+    },
+    "application_config": {
+      "config_file": "application.yaml",
+      "env_overrides": {
+        "rappmanager.acm.baseurl": "http://policy-clamp-runtime-acm:6969/onap/policy/clamp/acm/v2/",
+        "rappmanager.sme.baseurl": "http://capifcore:8090",
+        "rappmanager.dme.baseurl": "http://informationservice:9082",
+        "rappmanager.rapps.env.smeDiscoveryEndpoint": "DO_NOT_CHANGE_THIS_SME_DISCOVERY_ENDPOINT"
+      }
+    }
+  },
+  "package_layout": {
+    "acm": {
+      "definition": "Files/Acm/definition/compositions.json",
+      "instances": [
+        "Files/Acm/instances/k8s-instance.json"
+      ]
+    },
+    "sme": {
+      "providers": [
+        "Files/Sme/providers/provider-function-1.json"
+      ],
+      "service_apis": [
+        "Files/Sme/serviceapis/rapp-lifecycle-api.json",
+        "Files/Sme/serviceapis/r1-interface-api.json"
+      ],
+      "invokers": [
+        "Files/Sme/invokers/invoker-rapp-consumer.json"
+      ]
+    },
+    "tosca": {
+      "definitions": [
+        "Definitions/asd.yaml",
+        "Definitions/asd_types.yaml"
+      ],
+      "metadata": "TOSCA-Metadata/TOSCA.meta",
+      "manifest": "asd.mf"
+    }
+  }
+}

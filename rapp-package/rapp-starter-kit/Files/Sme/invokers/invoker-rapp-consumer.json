@@ -1,0 +1,23 @@
+{
+  "apiInvokerInformation": "rApp Starter Kit default API invoker",
+  "notificationDestination": "http://rapp-starter-kit-service.nonrtric.svc.cluster.local:8080",
+  "supportedFeatures": "0",
+  "apiList": [
+    {
+      "serviceAPICategory": "rApp lifecycle",
+      "apiName": "rApp Lifecycle Management API",
+      "apiVersion": "v1",
+      "apiSuppFeats": "0",
+      "commType": "REQUEST_RESPONSE",
+      "apiInvokerPublicKey": "NOT_USED_HERE"
+    },
+    {
+      "serviceAPICategory": "O-RAN R1",
+      "apiName": "O-RAN R1 Interface API",
+      "apiVersion": "v1",
+      "apiSuppFeats": "0",
+      "commType": "REQUEST_RESPONSE",
+      "apiInvokerPublicKey": "NOT_USED_HERE"
+    }
+  ]
+}

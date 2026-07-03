@@ -15,3 +15,6 @@ Source: Files/Acm/instances/k8s-instance.json
 Source: Files/Sme/providers/provider-function-1.json
 Source: Files/Sme/serviceapis/rapp-lifecycle-api.json
 Source: Files/Sme/serviceapis/r1-interface-api.json
+Source: Files/Sme/invokers/invoker-rapp-consumer.json
+Source: metadata/rapp-package-metadata.json
+Source: metadata/spring-boot-deployment.json

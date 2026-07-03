@@ -1,0 +1,49 @@
+tosca_definitions_version: tosca_simple_yaml_1_2
+
+artifact_types:
+  tosca.artifacts.asd.deploymentItem:
+    derived_from: tosca.artifacts.Root
+    description: Deployment artifact consumed during rApp onboarding
+    properties:
+      artifact_type:
+        type: string
+        required: true
+      target_server:
+        type: string
+        required: true
+      target_server_uri:
+        type: string
+        required: true
+      item_id:
+        type: string
+        required: true
+
+node_types:
+  tosca.nodes.asd:
+    derived_from: tosca.nodes.Root
+    description: Application Service Descriptor root node
+    properties:
+      descriptor_id:
+        type: string
+        required: true
+      descriptor_invariant_id:
+        type: string
+        required: true
+      descriptor_version:
+        type: string
+        required: true
+      schema_version:
+        type: string
+        required: true
+      function_description:
+        type: string
+        required: true
+      provider:
+        type: string
+        required: true
+      application_name:
+        type: string
+        required: true
+      application_version:
+        type: string
+        required: true

@@ -1,0 +1,64 @@
+{
+  "name": "RappStarterKitInstance0",
+  "version": "1.0.0",
+  "compositionId": "DO_NOT_CHANGE_THIS_COMPOSITION_ID",
+  "description": "Spring Boot rApp deployment descriptor for Kubernetes via ONAP ACM",
+  "deploymentTarget": "kubernetes",
+  "springBootApplication": {
+    "artifactId": "rapp-manager-application",
+    "groupId": "com.nokia.powehi.rapp",
+    "version": "0.1.0-SNAPSHOT",
+    "mainClass": "org.oransc.rappmanager.RappManagerApplication"
+  },
+  "helm": {
+    "chartId": {
+      "name": "rapp-starter-kit-chart",
+      "version": "0.1.0"
+    },
+    "namespace": "nonrtric",
+    "releaseName": "rapp-starter-kit",
+    "podName": "rapp-starter-kit",
+    "repository": {
+      "repoName": "local",
+      "address": "UPDATE_THIS_CHART_MUSEUM_GET_CHARTS_URI"
+    }
+  },
+  "image": {
+    "repository": "rapp-starter-kit",
+    "tag": "0.1.0-SNAPSHOT",
+    "pullPolicy": "IfNotPresent"
+  },
+  "service": {
+    "type": "ClusterIP",
+    "port": 8080,
+    "targetPort": 8080
+  },
+  "healthProbes": {
+    "livenessPath": "/actuator/health",
+    "readinessPath": "/actuator/health"
+  },
+  "overrideParams": {
+    "appId": "DO_NOT_CHANGE_THIS_RAPP_INSTANCE_ID",
+    "smeDiscoveryEndpoint": "DO_NOT_CHANGE_THIS_SME_DISCOVERY_ENDPOINT",
+    "env": {
+      "SPRING_PROFILES_ACTIVE": "kubernetes",
+      "rappmanager.acm.baseurl": "http://policy-clamp-runtime-acm:6969/onap/policy/clamp/acm/v2/",
+      "rappmanager.sme.baseurl": "http://capifcore:8090",
+      "rappmanager.dme.baseurl": "http://informationservice:9082"
+    }
+  },
+  "exposedApis": [
+    {
+      "name": "rApp Lifecycle Management API",
+      "basePath": "/rapps"
+    },
+    {
+      "name": "O-RAN R1 Configuration Management",
+      "basePath": "/ran-oam-cm/v1"
+    },
+    {
+      "name": "O-RAN R1 AI/ML Model Discovery",
+      "basePath": "/ai-ml-model-discovery/v1/models"
+    }
+  ]
+}
