@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: AI/ML Model discovery API
+  version: 1.0.0
+  description: |
+    O-RAN R1 AI/ML model discovery service (ETSI TS 104 231 clause 10.2).
+servers:
+  - url: '{apiRoot}/ai-ml-model-discovery/v1'
+    variables:
+      apiRoot:
+        default: 'http://localhost:8080'
+paths:
+  /models:
+    get:
+      summary: Discover registered AI/ML models
+      operationId: discoverAimlModels
+      tags:
+        - AI/ML Model Discovery
+      parameters:
+        - name: model-name
+          in: query
+          schema:
+            type: string
+        - name: model-version
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Matching registered models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelRelatedInformation'
+components:
+  schemas:
+    ModelId:
+      type: object
+      required: [modelName, modelVersion]
+      properties:
+        modelName:
+          type: string
+        modelVersion:
+          type: string
+        artifactVersion:
+          type: string
+    ModelRelatedInformation:
+      type: object
+      required: [modelId, metadata]
+      properties:
+        modelId:
+          $ref: '#/components/schemas/ModelId'
+        metadata:
+          type: string
+          description: AI/ML model related and training information

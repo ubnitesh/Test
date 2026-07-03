@@ -1,0 +1,51 @@
+{
+  "apiName": "rApp Lifecycle Management API",
+  "description": "rApp Manager lifecycle REST endpoints",
+  "aefProfiles": [
+    {
+      "aefId": "rApp Starter Kit as AEF",
+      "description": "rApp lifecycle management",
+      "versions": [
+        {
+          "apiVersion": "v1",
+          "resources": [
+            {
+              "resourceName": "rapps",
+              "commType": "REQUEST_RESPONSE",
+              "uri": "/rapps",
+              "operations": [
+                "GET",
+                "POST"
+              ]
+            },
+            {
+              "resourceName": "rapp-by-name",
+              "commType": "REQUEST_RESPONSE",
+              "uri": "/rapps/{name}",
+              "operations": [
+                "GET",
+                "DELETE"
+              ]
+            },
+            {
+              "resourceName": "rapp-instances",
+              "commType": "REQUEST_RESPONSE",
+              "uri": "/rapps/{name}/instances",
+              "operations": [
+                "GET",
+                "POST"
+              ]
+            }
+          ]
+        }
+      ],
+      "protocol": "HTTP_1_1",
+      "interfaceDescriptions": [
+        {
+          "ipv4Addr": "rapp-starter-kit-service.nonrtric.svc.cluster.local",
+          "port": 8080
+        }
+      ]
+    }
+  ]
+}

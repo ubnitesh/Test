@@ -1,0 +1,41 @@
+{
+  "apiName": "O-RAN R1 Interface API",
+  "description": "Configuration Management and AI/ML Model Discovery (ETSI TS 104 231)",
+  "aefProfiles": [
+    {
+      "aefId": "rApp Starter Kit as AEF",
+      "description": "O-RAN R1 application protocol endpoints",
+      "versions": [
+        {
+          "apiVersion": "v1",
+          "resources": [
+            {
+              "resourceName": "configuration-management",
+              "commType": "REQUEST_RESPONSE",
+              "uri": "/ran-oam-cm/v1",
+              "operations": [
+                "GET",
+                "PATCH"
+              ]
+            },
+            {
+              "resourceName": "aiml-model-discovery",
+              "commType": "REQUEST_RESPONSE",
+              "uri": "/ai-ml-model-discovery/v1/models",
+              "operations": [
+                "GET"
+              ]
+            }
+          ]
+        }
+      ],
+      "protocol": "HTTP_1_1",
+      "interfaceDescriptions": [
+        {
+          "ipv4Addr": "rapp-starter-kit-service.nonrtric.svc.cluster.local",
+          "port": 8080
+        }
+      ]
+    }
+  ]
+}

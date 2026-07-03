@@ -1,0 +1,20 @@
+{
+  "apiProvDomInfo": "Powehi rApp Starter Kit provider domain",
+  "apiProvFuncs": [
+    {
+      "apiProvFuncInfo": "rApp Starter Kit as APF",
+      "apiProvFuncRole": "APF",
+      "regInfo": {
+        "apiProvPubKey": "NOT_USED_HERE"
+      }
+    },
+    {
+      "apiProvFuncInfo": "rApp Starter Kit as AEF",
+      "apiProvFuncRole": "AEF",
+      "regInfo": {
+        "apiProvPubKey": "NOT_USED_HERE"
+      }
+    }
+  ],
+  "regSec": "plain"
+}

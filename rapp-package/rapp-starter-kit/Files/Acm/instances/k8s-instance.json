@@ -1,0 +1,47 @@
+{
+  "name": "RappStarterKitInstance0",
+  "version": "1.0.0",
+  "compositionId": "DO_NOT_CHANGE_THIS_COMPOSITION_ID",
+  "description": "Spring Boot rApp Starter Kit instance",
+  "elements": {
+    "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "definition": {
+        "name": "onap.policy.clamp.ac.element.K8S_RappStarterKitAutomationCompositionElement",
+        "version": "1.0.0"
+      },
+      "description": "Spring Boot rApp Manager application deployed via Helm",
+      "properties": {
+        "chart": {
+          "chartId": {
+            "name": "rapp-starter-kit-chart",
+            "version": "0.1.0"
+          },
+          "namespace": "nonrtric",
+          "releaseName": "rapp-starter-kit",
+          "podName": "rapp-starter-kit",
+          "repository": {
+            "repoName": "local",
+            "address": "UPDATE_THIS_CHART_MUSEUM_GET_CHARTS_URI"
+          },
+          "overrideParams": {
+            "appId": "DO_NOT_CHANGE_THIS_RAPP_INSTANCE_ID",
+            "smeDiscoveryEndpoint": "DO_NOT_CHANGE_THIS_SME_DISCOVERY_ENDPOINT",
+            "image": {
+              "repository": "rapp-starter-kit",
+              "tag": "0.1.0-SNAPSHOT"
+            },
+            "service": {
+              "port": 8080
+            },
+            "env": {
+              "rappmanager.acm.baseurl": "http://policy-clamp-runtime-acm:6969/onap/policy/clamp/acm/v2/",
+              "rappmanager.sme.baseurl": "http://capifcore:8090",
+              "rappmanager.dme.baseurl": "http://informationservice:9082"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Configuration Management API
+  version: 1.0.0-alpha.1
+  description: |
+    O-RAN R1 Configuration Management service (ETSI TS 104 231 clause 8.1).
+    Reuses 3GPP ProvMnS MOI read (GET) and write (PATCH) operations.
+servers:
+  - url: '{apiRoot}/ran-oam-cm/v1'
+    variables:
+      apiRoot:
+        default: 'http://localhost:8080'
+paths:
+  '/{moiPath}':
+    get:
+      summary: Read configuration data
+      operationId: readConfigurationData
+      parameters:
+        - name: moiPath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: MOI path, e.g. SubNetwork=SN1,GNBDUFunction=1
+      responses:
+        '200':
+          description: Configuration data for the requested MOI
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '404':
+          description: MOI not found
+    patch:
+      summary: Write configuration changes
+      operationId: writeConfigurationChanges
+      parameters:
+        - name: moiPath
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationModificationRequest'
+      responses:
+        '200':
+          description: Updated configuration data
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+components:
+  schemas:
+    ModifyOperator:
+      type: string
+      enum: [ADD, REMOVE, REPLACE]
+    MoModification:
+      type: object
+      required: [modifyOperator, path]
+      properties:
+        modifyOperator:
+          $ref: '#/components/schemas/ModifyOperator'
+        path:
+          type: string
+        value: {}
+    ConfigurationModificationRequest:
+      type: object
+      required: [modifications]
+      properties:
+        modifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/MoModification'

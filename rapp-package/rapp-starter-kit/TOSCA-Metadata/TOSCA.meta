@@ -1,0 +1,6 @@
+TOSCA-Meta-File-Version: 1.0
+CSAR-Version: 1.0
+Created-By: Nokia Powehi rApp Starter Kit
+Entry-Definitions: Definitions/asd.yaml
+ETSI-NFV-SOL-001: ETSI GS NFV-SOL 001 V3.3.1 (2021-06)
+
