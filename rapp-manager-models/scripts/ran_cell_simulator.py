@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-5G RAN cell performance simulator for 100 NR cells (cell-1 .. cell-100).
+5G RAN cell performance simulator for 20 NR cells (cell-1 .. cell-20).
 
 Models:
   - RSRP: Gaussian random walk plus log-normal shadow fading (dB domain)
@@ -43,7 +43,7 @@ RSRQ_MAX_DB = -3.0
 RSRQ_CRITICAL_DB = -12.0
 PRB_CRITICAL_PCT = 80.0
 
-NUM_CELLS = 100
+NUM_CELLS = 20
 DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "data" / "ran_telemetry.db"
 DEFAULT_TICK_SECONDS = 1.0
 CHART_HISTORY_POINTS = 120
@@ -138,10 +138,18 @@ class RanTelemetryDatabase:
         self._conn.commit()
 
     def seed_cells(self, cell_ids: list[str]) -> None:
+        placeholders = ", ".join("?" for _ in cell_ids)
         self._conn.executemany(
             "INSERT OR IGNORE INTO cells (cell_id) VALUES (?)",
             [(cell_id,) for cell_id in cell_ids],
         )
+        if cell_ids:
+            self._conn.execute(
+                f"DELETE FROM cell_latest WHERE cell_id NOT IN ({placeholders})",
+                cell_ids,
+            )
+        else:
+            self._conn.execute("DELETE FROM cell_latest")
         self._conn.commit()
         logger.info("Seeded %d cells in %s", len(cell_ids), self.db_path)
 
@@ -302,7 +310,7 @@ class WeightedKpiChart:
         ("prb_utilization_pct", "PRB Utilization (%)", "tab:red", 0, 100),
     )
 
-    def __init__(self, history_points: int) -> None:
+    def __init__(self, history_points: int, num_cells: int) -> None:
         self.history_points = history_points
         self.timestamps: list[datetime] = []
         self.series: dict[str, list[float]] = {
@@ -311,7 +319,7 @@ class WeightedKpiChart:
 
         self.fig, self.axes = plt.subplots(2, 2, figsize=(12, 7), sharex=True)
         self.fig.suptitle(
-            "5G RAN Network KPIs — Active-User Weighted Average (100 cells)",
+            f"5G RAN Network KPIs — Active-User Weighted Average ({num_cells} cells)",
             fontsize=13,
         )
         self.lines: dict[str, plt.Line2D] = {}
@@ -385,7 +393,7 @@ class WeightedKpiChart:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Simulate 5G RAN telemetry for 100 cells and persist to SQLite.",
+        description="Simulate 5G RAN telemetry for 20 cells and persist to SQLite.",
     )
     parser.add_argument(
         "--db-path",
@@ -436,7 +444,7 @@ def run_headless(config: SimulatorConfig, database: RanTelemetryDatabase) -> Non
 
 def run_with_chart(config: SimulatorConfig, database: RanTelemetryDatabase) -> None:
     simulator = RanCellSimulator(config)
-    chart = WeightedKpiChart(config.chart_history)
+    chart = WeightedKpiChart(config.chart_history, config.num_cells)
 
     def on_tick(_frame_index: int) -> None:
         snapshot = simulator.advance()
