@@ -138,20 +138,34 @@ class RanTelemetryDatabase:
         self._conn.commit()
 
     def seed_cells(self, cell_ids: list[str]) -> None:
-        placeholders = ", ".join("?" for _ in cell_ids)
+        """Register cells in the fleet registry (idempotent INSERT OR IGNORE)."""
         self._conn.executemany(
             "INSERT OR IGNORE INTO cells (cell_id) VALUES (?)",
             [(cell_id,) for cell_id in cell_ids],
         )
-        if cell_ids:
-            self._conn.execute(
-                f"DELETE FROM cell_latest WHERE cell_id NOT IN ({placeholders})",
-                cell_ids,
-            )
-        else:
-            self._conn.execute("DELETE FROM cell_latest")
         self._conn.commit()
         logger.info("Seeded %d cells in %s", len(cell_ids), self.db_path)
+
+    def prune_inactive_latest_cells(self, active_cell_ids: list[str]) -> None:
+        """Remove stale rows from cell_latest for cells outside the active fleet.
+
+        Intended for one-time startup sync when the simulated fleet size changes
+        (e.g. 100 → 20 cells). Does not modify cell_telemetry history.
+        """
+        if not active_cell_ids:
+            self._conn.execute("DELETE FROM cell_latest")
+        else:
+            placeholders = ", ".join("?" for _ in active_cell_ids)
+            self._conn.execute(
+                f"DELETE FROM cell_latest WHERE cell_id NOT IN ({placeholders})",
+                tuple(active_cell_ids),
+            )
+        self._conn.commit()
+        logger.info(
+            "Pruned cell_latest to %d active cells in %s",
+            len(active_cell_ids),
+            self.db_path,
+        )
 
     def persist_snapshot(self, snapshot: NetworkSnapshot) -> None:
         recorded_at = snapshot.timestamp.isoformat()
@@ -310,7 +324,7 @@ class WeightedKpiChart:
         ("prb_utilization_pct", "PRB Utilization (%)", "tab:red", 0, 100),
     )
 
-    def __init__(self, history_points: int, num_cells: int) -> None:
+    def __init__(self, history_points: int, num_cells: int = NUM_CELLS) -> None:
         self.history_points = history_points
         self.timestamps: list[datetime] = []
         self.series: dict[str, list[float]] = {
@@ -471,6 +485,7 @@ def main(argv: list[str] | None = None) -> int:
     cell_ids = [f"cell-{i}" for i in range(1, config.num_cells + 1)]
     database = RanTelemetryDatabase(config.db_path)
     database.seed_cells(cell_ids)
+    database.prune_inactive_latest_cells(cell_ids)
 
     logger.info(
         "Starting 5G RAN simulator for %d cells | DB=%s | tick=%.1fs",
