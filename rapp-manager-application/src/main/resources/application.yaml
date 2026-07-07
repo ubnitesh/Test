@@ -15,6 +15,10 @@ rappmanager:
     retryInterval: 2
   dme:
     baseurl: http://localhost:9082
+    telemetry:
+      enabled: true
+      database-path: ../rapp-manager-models/data/ran_telemetry.db
+      api-base-path: /dme/ran-telemetry/v1
   rapps:
     env:
       smeDiscoveryEndpoint: http://localhost:8095/service-apis/v1/allServiceAPIs

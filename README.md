@@ -32,7 +32,7 @@ mvn clean install
 
 ```bash
 cd rapp-manager-application
-mvn spring-boot:run
+mvn spring-boot:run <!When you run mvn clean install, you're doing two main things with Maven. First, the "clean" part removes the target folder, which gets rid of any old build files to ensure a fresh start. Then, the "install" part compiles your code, runs any tests, and packages your application into a file, like a JAR, placing it in your local repository so it can be used by other projects.!!>
 ```
 
 The application starts on port `8080`. Configure external service endpoints in `rapp-manager-application/src/main/resources/application.yaml`:
@@ -85,10 +85,19 @@ OpenAPI specs: `openapi/r1/configuration-management-api.yaml`, `openapi/r1/ai-ml
 
 ## Docker
 
-```bash
-mvn clean install
-docker build -t rapp-starter-kit rapp-manager-application
-docker run -p 8080:8080 rapp-starter-kit
+Maven builds the JAR under `%LOCALAPPDATA%\rapp-starter-kit-build\` (see parent `pom.xml`).
+Start **Docker Desktop**, then from the project root:
+
+```powershell
+.\docker-build.ps1
+docker run -p 8080:8080 rapp-starter-kit:0.1.0-SNAPSHOT
+```
+
+Or run without Docker:
+
+```powershell
+cd rapp-manager-application
+mvn spring-boot:run
 ```
 
 ## Reference

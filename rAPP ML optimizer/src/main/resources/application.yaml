@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+mloptimizer:
+  a1-mediator:
+    base-url: http://localhost:8081
+    policies-path: /a1-policy/v2/policies
+    policy-type-id: "20008"
+    service-id: rapp-ml-optimizer
+    status-notification-base: http://localhost:8080
+    publish-enabled: false

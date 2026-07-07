@@ -1,0 +1,117 @@
+{
+  "criticalCongestionConditions": {
+    "description": "Critical congestion is declared when ALL of the following are true (logical AND).",
+    "rules": [
+      {
+        "kpi": "prbUtilization",
+        "unit": "percent",
+        "operator": ">",
+        "threshold": 80.0,
+        "notes": "Physical Resource Block utilization exceeds 80% of available capacity"
+      },
+      {
+        "kpi": "rsrq",
+        "unit": "dB",
+        "operator": "<",
+        "threshold": -12.0,
+        "notes": "Reference Signal Received Quality below -12 dB indicates poor RF conditions under load"
+      }
+    ],
+    "offloadRangePercent": {
+      "min": 20.0,
+      "max": 50.0,
+      "notes": "When critical, the ML service recommends offloading 20-50% of active users to neighbor cells"
+    }
+  },
+  "neighborCells": [
+    "cell_nr_mumbai_02",
+    "cell_nr_mumbai_03",
+    "cell_nr_delhi_04"
+  ],
+  "cells": [
+    {
+      "cellId": "cell_nr_mumbai_01",
+      "rsrp": -98.4,
+      "rsrq": -14.6,
+      "activeUsers": 412,
+      "prbUtilization": 92.3,
+      "expectedCongestion": "CRITICAL"
+    },
+    {
+      "cellId": "cell_nr_mumbai_02",
+      "rsrp": -105.2,
+      "rsrq": -15.8,
+      "activeUsers": 387,
+      "prbUtilization": 88.7,
+      "expectedCongestion": "CRITICAL"
+    },
+    {
+      "cellId": "cell_nr_delhi_03",
+      "rsrp": -92.1,
+      "rsrq": -10.4,
+      "activeUsers": 298,
+      "prbUtilization": 86.2,
+      "expectedCongestion": "NORMAL",
+      "notes": "High PRB but RSRQ above -12 dB — not critical"
+    },
+    {
+      "cellId": "cell_nr_bangalore_04",
+      "rsrp": -110.7,
+      "rsrq": -16.3,
+      "activeUsers": 156,
+      "prbUtilization": 71.5,
+      "expectedCongestion": "NORMAL",
+      "notes": "Poor RSRQ but PRB below 80% — not critical"
+    },
+    {
+      "cellId": "cell_nr_chennai_05",
+      "rsrp": -88.6,
+      "rsrq": -9.1,
+      "activeUsers": 224,
+      "prbUtilization": 54.8,
+      "expectedCongestion": "NORMAL"
+    },
+    {
+      "cellId": "cell_nr_pune_06",
+      "rsrp": -101.3,
+      "rsrq": -13.4,
+      "activeUsers": 341,
+      "prbUtilization": 91.0,
+      "expectedCongestion": "CRITICAL"
+    },
+    {
+      "cellId": "cell_nr_hyderabad_07",
+      "rsrp": -96.8,
+      "rsrq": -12.6,
+      "activeUsers": 275,
+      "prbUtilization": 81.2,
+      "expectedCongestion": "CRITICAL",
+      "notes": "Borderline PRB just above 80% with RSRQ below -12 dB"
+    },
+    {
+      "cellId": "cell_nr_kolkata_08",
+      "rsrp": -85.9,
+      "rsrq": -8.3,
+      "activeUsers": 189,
+      "prbUtilization": 43.6,
+      "expectedCongestion": "NORMAL"
+    },
+    {
+      "cellId": "cell_nr_ahmedabad_09",
+      "rsrp": -113.5,
+      "rsrq": -18.1,
+      "activeUsers": 463,
+      "prbUtilization": 95.4,
+      "expectedCongestion": "CRITICAL"
+    },
+    {
+      "cellId": "cell_nr_jaipur_10",
+      "rsrp": -94.2,
+      "rsrq": -11.7,
+      "activeUsers": 201,
+      "prbUtilization": 78.9,
+      "expectedCongestion": "NORMAL",
+      "notes": "PRB below 80% threshold — not critical despite elevated load"
+    }
+  ]
+}
